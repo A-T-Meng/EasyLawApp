@@ -204,6 +204,46 @@ const _sfc_main = {
       this.msgList.splice(index, 2);
     },
     async beforeSend() {
+      if (this.inputBoxDisabled) {
+        return common_vendor.index.showToast({
+          title: "ai正在回复中不能发送",
+          icon: "none"
+        });
+      }
+      if (this.adpid) {
+        let token = common_vendor.index.getStorageSync("uni_id_token");
+        if (!token) {
+          return common_vendor.index.showModal({
+            // 提示内容
+            content: "启用激励视频，客户端需登录并启用安全网络",
+            // 不显示取消按钮
+            showCancel: false,
+            // 确认按钮文本
+            confirmText: "查看详情",
+            // 弹框关闭后执行的回调函数
+            complete() {
+              let url = "https://uniapp.dcloud.net.cn/uniCloud/uni-ai-chat.html#ad";
+              common_vendor.index.setClipboardData({
+                // 复制的内容
+                data: url,
+                // 不显示提示框
+                showToast: false,
+                // 复制成功后的回调函数
+                success() {
+                  common_vendor.index.showToast({
+                    // 提示内容
+                    title: "已复制文档链接，请到浏览器粘贴浏览",
+                    // 不显示图标
+                    icon: "none",
+                    // 提示框持续时间
+                    duration: 5e3
+                  });
+                }
+              });
+            }
+          });
+        }
+      }
       if (!this.content) {
         return common_vendor.index.showToast({
           // 提示内容
@@ -496,13 +536,13 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   }, $data.msgList.length === 0 ? {} : {}, {
     b: common_vendor.f($data.msgList, (msg, index, i0) => {
       return {
-        a: common_vendor.sr("msg", "1bc26bd5-0-" + i0, {
+        a: common_vendor.sr("msg", "00e69106-0-" + i0, {
           "f": 1
         }),
         b: index,
         c: common_vendor.o($options.changeAnswer, index),
         d: common_vendor.o(($event) => $options.removeMsg(index), index),
-        e: "1bc26bd5-0-" + i0,
+        e: "00e69106-0-" + i0,
         f: common_vendor.p({
           msg,
           ["show-cursor"]: index == $data.msgList.length - 1 && $data.msgList.length % 2 === 0 && $data.sseIndex,
@@ -559,7 +599,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     y: $options.inputBoxDisabled || !$data.content,
     z: $data.msgList.length && $data.msgList.length % 2 !== 0 ? "ai正在回复中不能发送" : "",
     A: $options.footBoxPaddingBottom,
-    B: common_vendor.sr("llm-config", "1bc26bd5-5")
+    B: common_vendor.sr("llm-config", "00e69106-5")
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

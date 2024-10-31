@@ -158,20 +158,20 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
       required: true,
       modelValue: $data.formData.password2
     }),
-    t: common_vendor.sr("captcha", "102eff1c-10,102eff1c-9"),
+    t: common_vendor.sr("captcha", "6b1654cb-10,6b1654cb-9"),
     v: common_vendor.o(($event) => $data.formData.captcha = $event),
     w: common_vendor.p({
       scene: "register",
       modelValue: $data.formData.captcha
     }),
-    x: common_vendor.sr("agreements", "102eff1c-11,102eff1c-0"),
+    x: common_vendor.sr("agreements", "6b1654cb-11,6b1654cb-0"),
     y: common_vendor.p({
       scope: "register"
     }),
     z: common_vendor.o((...args) => $options.submit && $options.submit(...args)),
     A: common_vendor.o((...args) => $options.navigateBack && $options.navigateBack(...args)),
     B: common_vendor.o((...args) => $options.toLogin && $options.toLogin(...args)),
-    C: common_vendor.sr("form", "102eff1c-0"),
+    C: common_vendor.sr("form", "6b1654cb-0"),
     D: common_vendor.p({
       value: $data.formData,
       rules: $data.rules,

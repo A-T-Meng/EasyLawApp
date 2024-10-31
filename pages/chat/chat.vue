@@ -420,12 +420,60 @@
 				this.msgList.splice(index,2)
 			},
 			async beforeSend() {
-				// if (this.inputBoxDisabled) {
-				// 	return uni.showToast({
-				// 		title: 'ai正在回复中不能发送',
-				// 		icon: 'none'
-				// 	});
-				// }
+				if (this.inputBoxDisabled) {
+					return uni.showToast({
+						title: 'ai正在回复中不能发送',
+						icon: 'none'
+					});
+				}
+				// 如果开启了广告位需要登录
+				if (this.adpid) {
+					// 获取本地缓存的token
+					let token = uni.getStorageSync('uni_id_token')
+					// 如果token不存在
+					if (!token) {
+						// 弹出提示框
+						return uni.showModal({
+							// 提示内容
+							content: '启用激励视频，客户端需登录并启用安全网络',
+							// 不显示取消按钮
+							showCancel: false,
+							// 确认按钮文本
+							confirmText: "查看详情",
+							// 弹框关闭后执行的回调函数
+							complete() {
+								// 文档链接
+								let url = "https://uniapp.dcloud.net.cn/uniCloud/uni-ai-chat.html#ad"
+								// #ifndef H5
+								// 将文档链接复制到剪贴板
+								uni.setClipboardData({
+									// 复制的内容
+									data: url,
+									// 不显示提示框
+									showToast: false,
+									// 复制成功后的回调函数
+									success() {
+										// 弹出提示框
+										uni.showToast({
+											// 提示内容
+											title: '已复制文档链接，请到浏览器粘贴浏览',
+											// 不显示图标
+											icon: 'none',
+											// 提示框持续时间
+											duration: 5000
+										});
+									}
+								})
+								// #endif
+
+								// #ifdef H5
+								// 在新窗口打开文档链接
+								window.open(url)
+								// #endif
+							}
+						});
+					}
+				}
 
 				// 如果内容为空
 				if (!this.content) {

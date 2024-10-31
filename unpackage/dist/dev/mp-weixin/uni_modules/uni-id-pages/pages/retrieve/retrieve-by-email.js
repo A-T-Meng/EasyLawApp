@@ -168,7 +168,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     e: common_vendor.p({
       name: "email"
     }),
-    f: common_vendor.sr("shortCode", "13ea3549-4,13ea3549-3"),
+    f: common_vendor.sr("shortCode", "bad3658c-4,bad3658c-3"),
     g: common_vendor.o(($event) => $data.formData.code = $event),
     h: common_vendor.p({
       email: $data.formData.email,
@@ -205,12 +205,12 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     r: common_vendor.o((...args) => $options.submit && $options.submit(...args)),
     s: common_vendor.o((...args) => $options.retrieveByPhone && $options.retrieveByPhone(...args)),
     t: common_vendor.o((...args) => $options.backLogin && $options.backLogin(...args)),
-    v: common_vendor.sr("form", "13ea3549-0"),
+    v: common_vendor.sr("form", "bad3658c-0"),
     w: common_vendor.p({
       value: $data.formData,
       ["err-show-type"]: "toast"
     }),
-    x: common_vendor.sr("popup", "13ea3549-9"),
+    x: common_vendor.sr("popup", "bad3658c-9"),
     y: common_vendor.o($options.submit),
     z: common_vendor.o(($event) => $data.formData.captcha = $event),
     A: common_vendor.p({
