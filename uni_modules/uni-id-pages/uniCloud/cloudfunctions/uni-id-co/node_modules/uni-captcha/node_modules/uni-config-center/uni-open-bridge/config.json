@@ -1,0 +1,12 @@
+{
+	"schedule": {
+		"appid": {
+			"enable": true,
+			"weixin-mp": {
+				"enable": true,
+				"tasks": ["accessToken"]
+			}
+		}
+	},
+	"ipWhiteList": ["0.0.0.0"]
+}

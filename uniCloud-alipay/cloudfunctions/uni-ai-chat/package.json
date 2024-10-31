@@ -1,0 +1,21 @@
+{
+    "name": "uni-ai-chat",
+    "dependencies": {
+        "uni-config-center": "file:..\/..\/..\/uni_modules\/uni-config-center\/uniCloud\/cloudfunctions\/common\/uni-config-center",
+        "uni-sec-check": "file:..\/..\/..\/uni_modules\/uni-sec-check\/uniCloud\/cloudfunctions\/common\/uni-sec-check",
+        "uni-id-common": "file:..\/..\/..\/uni_modules\/uni-id-common\/uniCloud\/cloudfunctions\/common\/uni-id-common"
+    },
+    "extensions": {
+        "uni-cloud-jql": {},
+        "uni-cloud-push": {},
+        "uni-cloud-ai": {}
+    },
+    "cloudfunction-config": {
+        "timeout": 60,
+        "runtime": "Nodejs12"
+    },
+    "origin-plugin-dev-name": "uni-ai-chat",
+    "origin-plugin-version": "1.2.13",
+    "plugin-dev-name": "uni-ai-chat",
+    "plugin-version": "1.2.13"
+}
