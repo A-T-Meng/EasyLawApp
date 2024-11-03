@@ -95,6 +95,17 @@
 	// 键盘的shift键是否被按下
 	let shiftKeyPressed = false
 	
+	// var socketTask = uni.connectSocket({
+	// 	url: 'ws://127.0.0.1:8888/ws',
+	// 	success: () => {
+	// 		console.log('success');
+	// 	},
+	// 	fail: () => {
+	// 		console.log('fail');
+	// 	},
+	// 	complete: () => {}
+	// });
+	
 	export default {
 		data() {
 			return {
@@ -119,6 +130,17 @@
 				llmModel: false,
 				keyboardHeight: 0
 			}
+		},
+		onLoad() {
+			// 页面启动的生命周期，这里编写页面加载时的逻辑
+			console.log("onload hahahhahah")
+			// socketTask.onOpen(() => {
+			//   console.log('WebSocket connection opened');
+			// });
+			
+			// socketTask.onClose(() => {
+			//   console.log('WebSocket connection closed');
+			// });
 		},
 		computed: {
 			// 输入框是否禁用
@@ -585,13 +607,22 @@
 				// 判断是否开启了流式响应模式
 				if (this.enableStream) {
 					// 创建消息通道
-					sseChannel = new uniCloud.SSEChannel()
+					var socketTask = uni.connectSocket({
+						url: 'ws://127.0.0.1:8888/websocket',
+						success: () => {
+							console.log('success');
+						},
+						fail: () => {
+							console.log('fail');
+						},
+						complete: () => {}
+					});
 					// console.log('sseChannel',sseChannel);
 					
 					// 将多个字的文本，分割成单个字 分批插入到最末尾的消息中
 					this.sliceMsgToLastMsg = new SliceMsgToLastMsg(this)
 					// 监听message事件
-					sseChannel.on('message', (message) => {
+					socketTask.onMessage((message) => {
 						// console.log('on message', message);
 						// 将从云端接收到的消息添加到消息列表中
 
@@ -611,56 +642,56 @@
 						this.showLastMsg()
 						// 让流式响应计数值递增
 						this.sseIndex++
-					})
+					});
 
 					// 监听end事件，如果云端执行end时传了message，会在客户端end事件内收到传递的消息
-					sseChannel.on('end', (e) => {
-						console.log('sse 结束',e)
-						// 更改“按字分割追加到最后一条消息“的时间间隔为0，即：一次性加载完（不再分割加载）
-						this.sliceMsgToLastMsg.t = 0
-						if(e && typeof e == 'object' && e.errCode){
-							let setLastAiMsgContent = (content)=>{
-								// console.log(content);
-								// 如果最后一项不是ai的就添加，否则就执行更新最后一条消息
-								if (this.sseIndex === 0) {
-									this.msgList.push({
-										isAi: true,
-										content,
-										create_time: Date.now()
-									})
-								} else {
-									this.updateLastMsg(lastMsg => {
-										lastMsg.content += content
-									})
-								}
-								this.showLastMsg()
-							}
-							if(e.errCode == 60004){
-								//服务商检测到AI输出了敏感内容
-								let length = this.msgList.length
-								//如果最后一项不是ai，就创建一项
-								if(length % 2){
-									this.msgList.push({
-										isAi: true,
-										content:"内容涉及敏感",
-										illegal:true,
-										create_time: Date.now()
-									})
-									length += 1
-								}
-								// 更新倒数第2项 用户提的问题
-								this.msgList[length - 2].illegal = true
-								// 更新倒数第1项 ai 回答的内容
-								this.msgList[length - 1].illegal = true
-								this.msgList[length - 1].content = "内容涉及敏感"
-								
-							}else{
-								setLastAiMsgContent(e.errMsg)
-							}
-						}
-						sseEnd()
-					})
-					await sseChannel.open(); // 等待通道开启
+					socketTask.onClose(() => {
+					  console.log('WebSocket connection closed');
+					  console.log('sse 结束',e)
+					  // 更改“按字分割追加到最后一条消息“的时间间隔为0，即：一次性加载完（不再分割加载）
+					  this.sliceMsgToLastMsg.t = 0
+					  if(e && typeof e == 'object' && e.errCode){
+					  	let setLastAiMsgContent = (content)=>{
+					  		// console.log(content);
+					  		// 如果最后一项不是ai的就添加，否则就执行更新最后一条消息
+					  		if (this.sseIndex === 0) {
+					  			this.msgList.push({
+					  				isAi: true,
+					  				content,
+					  				create_time: Date.now()
+					  			})
+					  		} else {
+					  			this.updateLastMsg(lastMsg => {
+					  				lastMsg.content += content
+					  			})
+					  		}
+					  		this.showLastMsg()
+					  	}
+					  	if(e.errCode == 60004){
+					  		//服务商检测到AI输出了敏感内容
+					  		let length = this.msgList.length
+					  		//如果最后一项不是ai，就创建一项
+					  		if(length % 2){
+					  			this.msgList.push({
+					  				isAi: true,
+					  				content:"内容涉及敏感",
+					  				illegal:true,
+					  				create_time: Date.now()
+					  			})
+					  			length += 1
+					  		}
+					  		// 更新倒数第2项 用户提的问题
+					  		this.msgList[length - 2].illegal = true
+					  		// 更新倒数第1项 ai 回答的内容
+					  		this.msgList[length - 1].illegal = true
+					  		this.msgList[length - 1].content = "内容涉及敏感"
+					  		
+					  	}else{
+					  		setLastAiMsgContent(e.errMsg)
+					  	}
+					  }
+					  sseEnd()
+					});
 					
 					// 等待对话完成（云函数请求完成，sse 执行了 end）之后
 					(function fnSelf(that){
