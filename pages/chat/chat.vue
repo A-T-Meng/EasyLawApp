@@ -75,15 +75,6 @@
 	import uniCoTask from '@/common/unicloud-co-task.js';
 	// 导入 将多个字消息文本，分割成单个字 分批插入到最末尾的消息中 的类
 	import SliceMsgToLastMsg from './SliceMsgToLastMsg.js';
-	// 收集所有执行云对象的任务列表
-	let uniCoTaskList = []
-	// 定义终止并清空 云对象的任务列表中所有 任务的方法
-	uniCoTaskList.clear = function() {
-		// 执行数组内的所有任务
-		uniCoTaskList.forEach(task => task.abort())
-		// 清空数组
-		uniCoTaskList.slice(0, uniCoTaskList.length)
-	}
 
 	// 获取广告id
 	const {
@@ -95,17 +86,9 @@
 	// 键盘的shift键是否被按下
 	let shiftKeyPressed = false
 	
-	// var socketTask = uni.connectSocket({
-	// 	url: 'ws://127.0.0.1:8888/ws',
-	// 	success: () => {
-	// 		console.log('success');
-	// 	},
-	// 	fail: () => {
-	// 		console.log('fail');
-	// 	},
-	// 	complete: () => {}
-	// });
-	
+	let socketOpen = false;
+	let socketMsgQueue = [];
+		
 	export default {
 		data() {
 			return {
@@ -133,14 +116,7 @@
 		},
 		onLoad() {
 			// 页面启动的生命周期，这里编写页面加载时的逻辑
-			console.log("onload hahahhahah")
-			// socketTask.onOpen(() => {
-			//   console.log('WebSocket connection opened');
-			// });
-			
-			// socketTask.onClose(() => {
-			//   console.log('WebSocket connection closed');
-			// });
+			this.initSocket()
 		},
 		computed: {
 			// 输入框是否禁用
@@ -322,25 +298,113 @@
 			})
 			// #endif
 		},
-		methods: {
+		methods: {			
+			sendSocketMessage(msg) {
+				if (socketOpen) {
+					uni.sendSocketMessage({
+						data: msg
+					});
+				} else {
+					socketMsgQueue.push(msg);
+				}
+			},
+			
+			initSocket() {
+				uni.connectSocket({
+				  url: 'ws://127.0.0.1:8888/ws'
+				});
+				
+				uni.onSocketOpen(function (res) {
+					socketOpen = true;
+					for (var i = 0; i < socketMsgQueue.length; i++) {
+						this.sendSocketMessage(socketMsgQueue[i]);
+					}
+					socketMsgQueue = [];
+				});
+				
+				uni.onSocketError(function (res) {
+					console.log('WebSocket连接打开失败，请检查！');
+				});
+				
+				uni.onSocketMessage(function (res) {
+				  console.log('收到服务器内容：' + res);
+				  // console.log('on message', message);
+				  // 将从云端接收到的消息添加到消息列表中
+				  
+				  // 如果之前未添加过就添加，否则就执行更新最后一条消息
+				  if (this.sseIndex === 0) {
+				  	this.msgList.push({
+				  		isAi: true,
+				  		content: message,
+				  		create_time: Date.now()
+				  	})
+				  } else {
+				  	this.sliceMsgToLastMsg.addMsg(message)
+				  	// this.updateLastMsg(lastMsg => {
+				  	// 	lastMsg.content += message
+				  	// })
+				  }
+				  this.showLastMsg()
+				  // 让流式响应计数值递增
+				  this.sseIndex++
+				});
+				
+				uni.onSocketClose(function (res) {
+				  console.log('WebSocket 已关闭！');
+				  console.log('WebSocket connection closed');
+				  console.log('sse 结束',e)
+				  // 更改“按字分割追加到最后一条消息“的时间间隔为0，即：一次性加载完（不再分割加载）
+				  this.sliceMsgToLastMsg.t = 0
+				  if(e && typeof e == 'object' && e.errCode){
+				  	let setLastAiMsgContent = (content)=>{
+				  		// console.log(content);
+				  		// 如果最后一项不是ai的就添加，否则就执行更新最后一条消息
+				  		if (this.sseIndex === 0) {
+				  			this.msgList.push({
+				  				isAi: true,
+				  				content,
+				  				create_time: Date.now()
+				  			})
+				  		} else {
+				  			this.updateLastMsg(lastMsg => {
+				  				lastMsg.content += content
+				  			})
+				  		}
+				  		this.showLastMsg()
+				  	}
+				  	if(e.errCode == 60004){
+				  		//服务商检测到AI输出了敏感内容
+				  		let length = this.msgList.length
+				  		//如果最后一项不是ai，就创建一项
+				  		if(length % 2){
+				  			this.msgList.push({
+				  				isAi: true,
+				  				content:"内容涉及敏感",
+				  				illegal:true,
+				  				create_time: Date.now()
+				  			})
+				  			length += 1
+				  		}
+				  		// 更新倒数第2项 用户提的问题
+				  		this.msgList[length - 2].illegal = true
+				  		// 更新倒数第1项 ai 回答的内容
+				  		this.msgList[length - 1].illegal = true
+				  		this.msgList[length - 1].content = "内容涉及敏感"
+				  		
+				  	}else{
+				  		setLastAiMsgContent(e.errMsg)
+				  	}
+				  }
+				});
+			},
+			
 			setLLMmodel() {
 				this.$refs['llm-config'].open(model => {
 					console.log('model', model);
 					this.llmModel = model
 				})
 			},
-			// 此(惰性)函数，检查是否开通uni-push;决定是否启用enableStream
-			async checkIsOpenPush() {
-				try {
-					// 获取推送客户端id
-					await uni.getPushClientId()
-					// 如果获取成功，则将checkIsOpenPush函数重写为一个空函数
-					this.checkIsOpenPush = () => {}
-				} catch (err) {
-					// 如果获取失败，则将enableStream设置为false
-					this.enableStream = false
-				}
-			},
+			
 			// 更新最后一条消息
 			updateLastMsg(param) {
 				let length = this.msgList.length
@@ -526,34 +590,9 @@
 				})
 				this.send() // 发送消息
 			},
-			async send() {
-				var socketTask = uni.connectSocket({
-					url: 'ws://127.0.0.1:8888/websocket',
-					success: () => {
-						console.log('success');
-					},
-					fail: () => {
-						console.log('fail');
-					},
-					complete: () => {}
-				});
-				
-				socketTask.onOpen(() => {
-				  console.log('WebSocket connection opened');
-				});
-				
-				socketTask.onMessage((message) => {
-				  console.log('Received message:', message.data);
-				});
-				
-				socketTask.onClose(() => {
-				  console.log('WebSocket connection closed');
-				});
-				
+			async send() {				
 				// 请求状态归零
 				this.requestState = 0
-				// 防止重复发起，关闭之前的
-				uniCoTaskList.clear()
 				// 清除旧的afterChatCompletion（如果存在）
 				if(this.afterChatCompletion && this.afterChatCompletion.clear) this.afterChatCompletion.clear()
 				
@@ -598,101 +637,13 @@
 				// 在控制台输出 向ai机器人发送的完整消息内容
 				console.log('send to ai messages:', messages);
 
-				// 检查是否开通uni-push;决定是否启用enableStream
-				await this.checkIsOpenPush()
-				// console.log('this.enableStream',this.enableStream);
-
 				// 流式响应和云对象的请求结束回调函数
 				let sseEnd,requestEnd;
 				// 判断是否开启了流式响应模式
 				if (this.enableStream) {
-					// 创建消息通道
-					var socketTask = uni.connectSocket({
-						url: 'ws://127.0.0.1:8888/websocket',
-						success: () => {
-							console.log('success');
-						},
-						fail: () => {
-							console.log('fail');
-						},
-						complete: () => {}
-					});
-					// console.log('sseChannel',sseChannel);
-					
 					// 将多个字的文本，分割成单个字 分批插入到最末尾的消息中
 					this.sliceMsgToLastMsg = new SliceMsgToLastMsg(this)
-					// 监听message事件
-					socketTask.onMessage((message) => {
-						// console.log('on message', message);
-						// 将从云端接收到的消息添加到消息列表中
-
-						// 如果之前未添加过就添加，否则就执行更新最后一条消息
-						if (this.sseIndex === 0) {
-							this.msgList.push({
-								isAi: true,
-								content: message,
-								create_time: Date.now()
-							})
-						} else {
-							this.sliceMsgToLastMsg.addMsg(message)
-							// this.updateLastMsg(lastMsg => {
-							// 	lastMsg.content += message
-							// })
-						}
-						this.showLastMsg()
-						// 让流式响应计数值递增
-						this.sseIndex++
-					});
-
-					// 监听end事件，如果云端执行end时传了message，会在客户端end事件内收到传递的消息
-					socketTask.onClose(() => {
-					  console.log('WebSocket connection closed');
-					  console.log('sse 结束',e)
-					  // 更改“按字分割追加到最后一条消息“的时间间隔为0，即：一次性加载完（不再分割加载）
-					  this.sliceMsgToLastMsg.t = 0
-					  if(e && typeof e == 'object' && e.errCode){
-					  	let setLastAiMsgContent = (content)=>{
-					  		// console.log(content);
-					  		// 如果最后一项不是ai的就添加，否则就执行更新最后一条消息
-					  		if (this.sseIndex === 0) {
-					  			this.msgList.push({
-					  				isAi: true,
-					  				content,
-					  				create_time: Date.now()
-					  			})
-					  		} else {
-					  			this.updateLastMsg(lastMsg => {
-					  				lastMsg.content += content
-					  			})
-					  		}
-					  		this.showLastMsg()
-					  	}
-					  	if(e.errCode == 60004){
-					  		//服务商检测到AI输出了敏感内容
-					  		let length = this.msgList.length
-					  		//如果最后一项不是ai，就创建一项
-					  		if(length % 2){
-					  			this.msgList.push({
-					  				isAi: true,
-					  				content:"内容涉及敏感",
-					  				illegal:true,
-					  				create_time: Date.now()
-					  			})
-					  			length += 1
-					  		}
-					  		// 更新倒数第2项 用户提的问题
-					  		this.msgList[length - 2].illegal = true
-					  		// 更新倒数第1项 ai 回答的内容
-					  		this.msgList[length - 1].illegal = true
-					  		this.msgList[length - 1].content = "内容涉及敏感"
-					  		
-					  	}else{
-					  		setLastAiMsgContent(e.errMsg)
-					  	}
-					  }
-					  sseEnd()
-					});
-					
+					this.sendSocketMessage(messages)
 					// 等待对话完成（云函数请求完成，sse 执行了 end）之后
 					(function fnSelf(that){
 						fnSelf.clear = ()=>{
@@ -770,21 +721,6 @@
             	})
             }
 
-						// 非流式模式 或者流式模式，但列表还没有数据且已经进入异常的情况下
-						if (this.enableStream == false || this.sseIndex == 0 && (illegal||insufficientScore)) {
-							// 将从云端接收到的消息添加到消息列表中
-							this.msgList.push({
-								// 消息创建时间
-								create_time: Date.now(),
-								// 标记消息为来自AI机器人
-								isAi: true,
-								// 消息内容
-								content:reply,
-								// 消息是否涉敏标记
-								illegal
-							})
-						}
-						
 						if(insufficientScore){
 							// 积分不足
 							this.insufficientScore = true
@@ -837,7 +773,6 @@
 						}
 					}
 				})
-				uniCoTaskList.push(task)
 			},
 			closeSseChannel() {
 				// 如果存在消息通道，就关闭消息通道
@@ -847,8 +782,6 @@
 					sseChannel = false
 					this.sliceMsgToLastMsg.end()
 				}
-				// 清空历史网络请求（调用云对象）任务
-				uniCoTaskList.clear()
 				// 将流式响应计数值归零
 				this.sseIndex = 0
 			},
