@@ -115,8 +115,9 @@
 			}
 		},
 		onLoad() {
+			console.log(111111, this.msgList);
 			// 页面启动的生命周期，这里编写页面加载时的逻辑
-			this.initSocket()
+			this.initSocket();
 		},
 		computed: {
 			// 输入框是否禁用
@@ -300,6 +301,7 @@
 		},
 		methods: {			
 			sendSocketMessage(msg) {
+				console.log(msg, this.msgList)
 				if (socketOpen) {
 					uni.sendSocketMessage({
 						data: msg
@@ -310,15 +312,24 @@
 			},
 			
 			initSocket() {
+				let aaa = this
 				uni.connectSocket({
 				  url: 'ws://127.0.0.1:8888/ws'
 				});
 				
 				uni.onSocketOpen(function (res) {
+					aaa.msgList.push({
+						// 标记为非人工智能机器人，即：为用户发送的消息
+						isAi: false,
+						// 消息内容
+						content: 'hahahha',
+						// 消息创建时间
+						create_time: Date.now()
+					});
 					socketOpen = true;
 					for (var i = 0; i < socketMsgQueue.length; i++) {
-						this.sendSocketMessage(socketMsgQueue[i]);
-					}
+						aaa.sendSocketMessage(socketMsgQueue[i]);
+					};
 					socketMsgQueue = [];
 				});
 				
@@ -327,12 +338,21 @@
 				});
 				
 				uni.onSocketMessage(function (res) {
-				  console.log('收到服务器内容：' + res);
+				  console.log('收到服务器内容：' + res.data);
+				  console.log('收到服务器内容', aaa.msgList)
+				  aaa.msgList.push({
+						// 标记为非人工智能机器人，即：为用户发送的消息
+						isAi: false,
+						// 消息内容
+						content: 'hahahha',
+						// 消息创建时间
+						create_time: Date.now()
+					});
 				  // console.log('on message', message);
 				  // 将从云端接收到的消息添加到消息列表中
 				  
 				  // 如果之前未添加过就添加，否则就执行更新最后一条消息
-				  if (this.sseIndex === 0) {
+				  if (self.sseIndex === 0) {
 				  	this.msgList.push({
 				  		isAi: true,
 				  		content: message,
