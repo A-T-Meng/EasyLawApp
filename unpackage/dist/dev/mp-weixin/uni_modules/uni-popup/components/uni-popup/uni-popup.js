@@ -37,6 +37,9 @@ const _sfc_main = {
     maskBackgroundColor: {
       type: String,
       default: "rgba(0, 0, 0, 0.4)"
+    },
+    borderRadius: {
+      type: String
     }
   },
   watch: {
@@ -106,16 +109,25 @@ const _sfc_main = {
         backgroundColor: "rgba(0, 0, 0, 0.4)"
       },
       transClass: {
+        backgroundColor: "transparent",
+        borderRadius: this.borderRadius || "0",
         position: "fixed",
         left: 0,
         right: 0
       },
       maskShow: true,
       mkclick: true,
-      popupstyle: this.isDesktop ? "fixforpc-top" : "top"
+      popupstyle: "top"
     };
   },
   computed: {
+    getStyles() {
+      let res = { backgroundColor: this.bg };
+      if (this.borderRadius || "0") {
+        res = Object.assign(res, { borderRadius: this.borderRadius });
+      }
+      return res;
+    },
     isDesktop() {
       return this.popupWidth >= 500 && this.popupHeight >= 500;
     },
@@ -135,7 +147,7 @@ const _sfc_main = {
         safeArea,
         screenHeight,
         safeAreaInsets
-      } = common_vendor.index.getSystemInfoSync();
+      } = common_vendor.index.getWindowInfo();
       this.popupWidth = windowWidth;
       this.popupHeight = windowHeight + (windowTop || 0);
       if (safeArea && this.safeArea) {
@@ -149,6 +161,12 @@ const _sfc_main = {
   // TODO vue3
   unmounted() {
     this.setH5Visible();
+  },
+  activated() {
+    this.setH5Visible(!this.showPopup);
+  },
+  deactivated() {
+    this.setH5Visible(true);
   },
   created() {
     if (this.isMaskClick === null && this.maskClick === null) {
@@ -166,7 +184,7 @@ const _sfc_main = {
     this.maskClass.backgroundColor = this.maskBackgroundColor;
   },
   methods: {
-    setH5Visible() {
+    setH5Visible(visible = true) {
     },
     /**
      * 公用方法，不显示遮罩层
@@ -238,13 +256,15 @@ const _sfc_main = {
         position: "fixed",
         left: 0,
         right: 0,
-        backgroundColor: this.bg
+        backgroundColor: this.bg,
+        borderRadius: this.borderRadius || "0"
       };
       if (type)
         return;
       this.showPopup = true;
       this.showTrans = true;
       this.$nextTick(() => {
+        this.showPoptrans();
         if (this.messageChild && this.type === "message") {
           this.messageChild.timerClose();
         }
@@ -262,19 +282,19 @@ const _sfc_main = {
         right: 0,
         bottom: 0,
         paddingBottom: this.safeAreaInsets + "px",
-        backgroundColor: this.bg
+        backgroundColor: this.bg,
+        borderRadius: this.borderRadius || "0"
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
     },
     /**
      * 中间弹出样式处理
      */
     center(type) {
       this.popupstyle = "center";
-      this.ani = ["zoom-out", "fade"];
+      this.ani = ["fade"];
       this.transClass = {
         position: "fixed",
         display: "flex",
@@ -284,12 +304,12 @@ const _sfc_main = {
         right: 0,
         top: 0,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        borderRadius: this.borderRadius || "0"
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
     },
     left(type) {
       this.popupstyle = "left";
@@ -300,13 +320,13 @@ const _sfc_main = {
         bottom: 0,
         top: 0,
         backgroundColor: this.bg,
+        borderRadius: this.borderRadius || "0",
         display: "flex",
         flexDirection: "column"
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
     },
     right(type) {
       this.popupstyle = "right";
@@ -317,13 +337,19 @@ const _sfc_main = {
         right: 0,
         top: 0,
         backgroundColor: this.bg,
+        borderRadius: this.borderRadius || "0",
         display: "flex",
         flexDirection: "column"
       };
       if (type)
         return;
-      this.showPopup = true;
-      this.showTrans = true;
+      this.showPoptrans();
+    },
+    showPoptrans() {
+      this.$nextTick(() => {
+        this.showPopup = true;
+        this.showTrans = true;
+      });
     }
   }
 };
@@ -350,7 +376,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
       show: $data.showTrans
     })
   } : {}, {
-    e: $options.bg,
+    e: common_vendor.s($options.getStyles),
     f: common_vendor.n($data.popupstyle),
     g: common_vendor.o((...args) => $options.clear && $options.clear(...args)),
     h: common_vendor.o($options.onTap),

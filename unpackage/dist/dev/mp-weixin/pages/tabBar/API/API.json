@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "简法一键",
+  "usingComponents": {
+    "set-tab-bar": "../../../components/api-set-tabbar"
+  }
+}

@@ -37,7 +37,7 @@ const _sfc_main = {
       type: String,
       default: ""
     },
-    // label的宽度 ，默认 80
+    // label的宽度
     labelWidth: {
       type: [String, Number],
       default: ""
@@ -74,7 +74,7 @@ const _sfc_main = {
       errMsg: "",
       userRules: null,
       localLabelAlign: "left",
-      localLabelWidth: "65px",
+      localLabelWidth: "70px",
       localLabelPos: "left",
       border: false,
       isFirstBorder: false
@@ -295,7 +295,7 @@ const _sfc_main = {
     },
     // 处理 label宽度单位 ,继承父元素的值
     _labelWidthUnit(labelWidth) {
-      return this.num2px(this.labelWidth ? this.labelWidth : labelWidth || (this.label ? 65 : "auto"));
+      return this.num2px(this.labelWidth ? this.labelWidth : labelWidth || (this.label ? 70 : "auto"));
     },
     // 处理 label 位置
     _labelPosition() {

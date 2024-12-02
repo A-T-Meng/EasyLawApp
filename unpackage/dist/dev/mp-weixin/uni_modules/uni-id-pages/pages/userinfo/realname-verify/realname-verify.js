@@ -132,7 +132,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   } : common_vendor.e({
     d: $data.verifyFail
   }, $data.verifyFail ? common_vendor.e({
-    e: common_assets._imports_0,
+    e: common_assets._imports_0$4,
     f: common_vendor.t($data.verifyFailTitle),
     g: common_vendor.t($data.verifyFailContent),
     h: $data.verifyFailCode !== 10013

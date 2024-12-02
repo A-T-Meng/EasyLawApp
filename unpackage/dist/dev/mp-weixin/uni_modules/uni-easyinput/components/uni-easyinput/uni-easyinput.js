@@ -20,7 +20,19 @@ function obj2strStyle(obj) {
 }
 const _sfc_main = {
   name: "uni-easyinput",
-  emits: ["click", "iconClick", "update:modelValue", "input", "focus", "blur", "confirm", "clear", "eyes", "change", "keyboardheightchange"],
+  emits: [
+    "click",
+    "iconClick",
+    "update:modelValue",
+    "input",
+    "focus",
+    "blur",
+    "confirm",
+    "clear",
+    "eyes",
+    "change",
+    "keyboardheightchange"
+  ],
   model: {
     prop: "modelValue",
     event: "update:modelValue"
@@ -100,6 +112,10 @@ const _sfc_main = {
       default: 0
     },
     passwordIcon: {
+      type: Boolean,
+      default: true
+    },
+    adjustPosition: {
       type: Boolean,
       default: true
     },
@@ -187,9 +203,17 @@ const _sfc_main = {
   },
   watch: {
     value(newVal) {
+      if (newVal === null) {
+        this.val = "";
+        return;
+      }
       this.val = newVal;
     },
     modelValue(newVal) {
+      if (newVal === null) {
+        this.val = "";
+        return;
+      }
       this.val = newVal;
     },
     focus(newVal) {
@@ -223,7 +247,7 @@ const _sfc_main = {
       } else if (this.modelValue || this.modelValue === 0 || this.modelValue === "") {
         this.val = this.modelValue;
       } else {
-        this.val = null;
+        this.val = "";
       }
     },
     /**
@@ -282,7 +306,7 @@ const _sfc_main = {
      */
     onBlur() {
       this.focused = false;
-      this.$emit("focus", null);
+      this.$emit("blur", null);
     },
     _Blur(event) {
       event.detail.value;
@@ -382,66 +406,69 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     l: $data.focused,
     m: $props.autoHeight,
     n: $props.cursorSpacing,
-    o: common_vendor.o((...args) => $options.onInput && $options.onInput(...args)),
-    p: common_vendor.o((...args) => $options._Blur && $options._Blur(...args)),
-    q: common_vendor.o((...args) => $options._Focus && $options._Focus(...args)),
-    r: common_vendor.o((...args) => $options.onConfirm && $options.onConfirm(...args)),
-    s: common_vendor.o((...args) => $options.onkeyboardheightchange && $options.onkeyboardheightchange(...args))
+    o: $props.adjustPosition,
+    p: common_vendor.o((...args) => $options.onInput && $options.onInput(...args)),
+    q: common_vendor.o((...args) => $options._Blur && $options._Blur(...args)),
+    r: common_vendor.o((...args) => $options._Focus && $options._Focus(...args)),
+    s: common_vendor.o((...args) => $options.onConfirm && $options.onConfirm(...args)),
+    t: common_vendor.o((...args) => $options.onkeyboardheightchange && $options.onkeyboardheightchange(...args))
   } : {
-    t: $props.type === "password" ? "text" : $props.type,
-    v: common_vendor.s($options.inputStyle),
-    w: $props.name,
-    x: $data.val,
-    y: !$data.showPassword && $props.type === "password",
-    z: $props.placeholder,
-    A: $props.placeholderStyle,
-    B: $props.disabled,
-    C: $options.inputMaxlength,
-    D: $data.focused,
-    E: $props.confirmType,
-    F: $props.cursorSpacing,
-    G: common_vendor.o((...args) => $options._Focus && $options._Focus(...args)),
-    H: common_vendor.o((...args) => $options._Blur && $options._Blur(...args)),
-    I: common_vendor.o((...args) => $options.onInput && $options.onInput(...args)),
-    J: common_vendor.o((...args) => $options.onConfirm && $options.onConfirm(...args)),
-    K: common_vendor.o((...args) => $options.onkeyboardheightchange && $options.onkeyboardheightchange(...args))
+    v: $props.type === "password" ? "text" : $props.type,
+    w: common_vendor.s($options.inputStyle),
+    x: $props.name,
+    y: $data.val,
+    z: !$data.showPassword && $props.type === "password",
+    A: $props.placeholder,
+    B: $props.placeholderStyle,
+    C: $props.disabled,
+    D: $options.inputMaxlength,
+    E: $data.focused,
+    F: $props.confirmType,
+    G: $props.cursorSpacing,
+    H: $props.adjustPosition,
+    I: common_vendor.o((...args) => $options._Focus && $options._Focus(...args)),
+    J: common_vendor.o((...args) => $options._Blur && $options._Blur(...args)),
+    K: common_vendor.o((...args) => $options.onInput && $options.onInput(...args)),
+    L: common_vendor.o((...args) => $options.onConfirm && $options.onConfirm(...args)),
+    M: common_vendor.o((...args) => $options.onkeyboardheightchange && $options.onkeyboardheightchange(...args))
   }, {
-    L: $props.type === "password" && $props.passwordIcon
+    N: $props.type === "password" && $props.passwordIcon
   }, $props.type === "password" && $props.passwordIcon ? common_vendor.e({
-    M: $options.isVal
+    O: $options.isVal
   }, $options.isVal ? {
-    N: $props.type === "textarea" ? 1 : "",
-    O: common_vendor.o($options.onEyes),
-    P: common_vendor.p({
+    P: $props.type === "textarea" ? 1 : "",
+    Q: common_vendor.o($options.onEyes),
+    R: common_vendor.p({
       type: $data.showPassword ? "eye-slash-filled" : "eye-filled",
       size: 22,
       color: $data.focusShow ? $props.primaryColor : "#c0c4cc"
     })
-  } : {}) : $props.suffixIcon ? common_vendor.e({
-    R: $props.suffixIcon
+  } : {}) : {}, {
+    S: $props.suffixIcon
+  }, $props.suffixIcon ? common_vendor.e({
+    T: $props.suffixIcon
   }, $props.suffixIcon ? {
-    S: common_vendor.o(($event) => $options.onClickIcon("suffix")),
-    T: common_vendor.p({
+    U: common_vendor.o(($event) => $options.onClickIcon("suffix")),
+    V: common_vendor.p({
       type: $props.suffixIcon,
       color: "#c0c4cc",
       size: "22"
     })
   } : {}) : common_vendor.e({
-    U: $props.clearable && $options.isVal && !$props.disabled && $props.type !== "textarea"
+    W: $props.clearable && $options.isVal && !$props.disabled && $props.type !== "textarea"
   }, $props.clearable && $options.isVal && !$props.disabled && $props.type !== "textarea" ? {
-    V: $props.type === "textarea" ? 1 : "",
-    W: common_vendor.o($options.onClear),
-    X: common_vendor.p({
+    X: $props.type === "textarea" ? 1 : "",
+    Y: common_vendor.o($options.onClear),
+    Z: common_vendor.p({
       type: "clear",
       size: $props.clearSize,
       color: $options.msg ? "#dd524d" : $data.focusShow ? $props.primaryColor : "#c0c4cc"
     })
   } : {}), {
-    Q: $props.suffixIcon,
-    Y: common_vendor.n($options.inputContentClass),
-    Z: common_vendor.s($options.inputContentStyle),
-    aa: $options.msg ? 1 : "",
-    ab: common_vendor.s($options.boxStyle)
+    aa: common_vendor.n($options.inputContentClass),
+    ab: common_vendor.s($options.inputContentStyle),
+    ac: $options.msg ? 1 : "",
+    ad: common_vendor.s($options.boxStyle)
   });
 }
 const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

@@ -85,10 +85,7 @@
 
 	// 键盘的shift键是否被按下
 	let shiftKeyPressed = false
-	
-	let socketOpen = false;
-	let socketMsgQueue = [];
-		
+
 	export default {
 		data() {
 			return {
@@ -111,7 +108,9 @@
 				// 广告位id
 				adpid,
 				llmModel: false,
-				keyboardHeight: 0
+				keyboardHeight: 0,
+				socketOpen: false,
+				socketMsgQueue: [],
 			}
 		},
 		onLoad() {
@@ -122,6 +121,7 @@
 		computed: {
 			// 输入框是否禁用
 			inputBoxDisabled() {
+				return false
 				// 如果正在等待流式响应，则禁用输入框
 				if (this.sseIndex !== 0) {
 					return true
@@ -299,67 +299,49 @@
 			})
 			// #endif
 		},
-		methods: {			
-			sendSocketMessage(msg) {
-				console.log(msg, this.msgList)
-				if (socketOpen) {
-					uni.sendSocketMessage({
-						data: msg
-					});
-				} else {
-					socketMsgQueue.push(msg);
+		methods: {	
+			sendSocketMessage(messages) {
+				for (var i = 0; i < messages.length; i++) {
+					console.log(messages[i].content)
+					if (this.socketOpen) {
+						uni.sendSocketMessage({
+							data: messages[i].content
+						});
+					} else {
+						this.socketMsgQueue.push(messages[i]);
+					}
 				}
 			},
 			
 			initSocket() {
-				let aaa = this
 				uni.connectSocket({
 				  url: 'ws://127.0.0.1:8888/ws'
 				});
 				
-				uni.onSocketOpen(function (res) {
-					aaa.msgList.push({
-						// 标记为非人工智能机器人，即：为用户发送的消息
-						isAi: false,
-						// 消息内容
-						content: 'hahahha',
-						// 消息创建时间
-						create_time: Date.now()
-					});
-					socketOpen = true;
-					for (var i = 0; i < socketMsgQueue.length; i++) {
-						aaa.sendSocketMessage(socketMsgQueue[i]);
-					};
-					socketMsgQueue = [];
+				uni.onSocketOpen((res) => {
+					this.socketOpen = true;
+					this.socketMsgQueue = [];
 				});
 				
 				uni.onSocketError(function (res) {
 					console.log('WebSocket连接打开失败，请检查！');
 				});
 				
-				uni.onSocketMessage(function (res) {
-				  console.log('收到服务器内容：' + res.data);
-				  console.log('收到服务器内容', aaa.msgList)
-				  aaa.msgList.push({
+				uni.onSocketMessage((res) => {
+				  console.log('收到服务器内容：' + res.data, this.sseIndex);
+				  // 将从云端接收到的消息添加到消息列表中
+				  // 如果之前未添加过就添加，否则就执行更新最后一条消息
+				  if (this.sseIndex === 0) {
+					this.msgList.push({
 						// 标记为非人工智能机器人，即：为用户发送的消息
-						isAi: false,
+						isAi: true,
 						// 消息内容
-						content: 'hahahha',
+						content: res.data,
 						// 消息创建时间
 						create_time: Date.now()
 					});
-				  // console.log('on message', message);
-				  // 将从云端接收到的消息添加到消息列表中
-				  
-				  // 如果之前未添加过就添加，否则就执行更新最后一条消息
-				  if (self.sseIndex === 0) {
-				  	this.msgList.push({
-				  		isAi: true,
-				  		content: message,
-				  		create_time: Date.now()
-				  	})
 				  } else {
-				  	this.sliceMsgToLastMsg.addMsg(message)
+				  	this.sliceMsgToLastMsg.addMsg(res.data)
 				  	// this.updateLastMsg(lastMsg => {
 				  	// 	lastMsg.content += message
 				  	// })

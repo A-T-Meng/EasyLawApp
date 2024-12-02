@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "uni-ai-chat",
+  "navigationBarTitleText": "简法一键",
   "enablePullDownRefresh": false,
   "usingComponents": {
     "uni-ai-msg": "../../components/uni-ai-msg/uni-ai-msg",

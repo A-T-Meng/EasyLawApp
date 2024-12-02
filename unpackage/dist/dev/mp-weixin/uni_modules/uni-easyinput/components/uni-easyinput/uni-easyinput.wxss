@@ -50,6 +50,17 @@
   line-height: 1;
   font-size: 14px;
   height: 35px;
+  /*ifdef H5*/
+  /*endif*/
+}
+.uni-easyinput__content-input ::-ms-reveal {
+  display: none;
+}
+.uni-easyinput__content-input ::-ms-clear {
+  display: none;
+}
+.uni-easyinput__content-input ::-o-clear {
+  display: none;
 }
 .uni-easyinput__placeholder-class {
   color: #999;

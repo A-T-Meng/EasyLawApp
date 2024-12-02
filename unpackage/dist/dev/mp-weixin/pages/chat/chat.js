@@ -3,11 +3,6 @@ const common_vendor = require("../../common/vendor.js");
 const config = require("../../config.js");
 const common_unicloudCoTask = require("../../common/unicloud-co-task.js");
 const pages_chat_SliceMsgToLastMsg = require("./SliceMsgToLastMsg.js");
-let uniCoTaskList = [];
-uniCoTaskList.clear = function() {
-  uniCoTaskList.forEach((task) => task.abort());
-  uniCoTaskList.slice(0, uniCoTaskList.length);
-};
 const {
   adpid
 } = config.config;
@@ -35,16 +30,19 @@ const _sfc_main = {
       // 广告位id
       adpid,
       llmModel: false,
-      keyboardHeight: 0
+      keyboardHeight: 0,
+      socketOpen: false,
+      socketMsgQueue: []
     };
+  },
+  onLoad() {
+    console.log(111111, this.msgList);
+    this.initSocket();
   },
   computed: {
     // 输入框是否禁用
     inputBoxDisabled() {
-      if (this.sseIndex !== 0) {
-        return true;
-      }
-      return !!(this.msgList.length && this.msgList.length % 2 !== 0);
+      return false;
     },
     // 获取当前环境
     NODE_ENV() {
@@ -103,29 +101,99 @@ const _sfc_main = {
     this.$nextTick(() => {
       this.showLastMsg();
     });
-    common_vendor.index.onKeyboardHeightChange((e) => {
-      this.keyboardHeight = e.height;
+    common_vendor.index.onKeyboardHeightChange((e2) => {
+      this.keyboardHeight = e2.height;
       this.$nextTick(() => {
         this.showLastMsg();
       });
     });
   },
   methods: {
+    sendSocketMessage(messages) {
+      for (var i = 0; i < messages.length; i++) {
+        console.log(messages[i].content);
+        if (this.socketOpen) {
+          common_vendor.index.sendSocketMessage({
+            data: messages[i].content
+          });
+        } else {
+          this.socketMsgQueue.push(messages[i]);
+        }
+      }
+    },
+    initSocket() {
+      common_vendor.index.connectSocket({
+        url: "ws://127.0.0.1:8888/ws"
+      });
+      common_vendor.index.onSocketOpen((res) => {
+        this.socketOpen = true;
+        this.socketMsgQueue = [];
+      });
+      common_vendor.index.onSocketError(function(res) {
+        console.log("WebSocket连接打开失败，请检查！");
+      });
+      common_vendor.index.onSocketMessage((res) => {
+        console.log("收到服务器内容：" + res.data, this.sseIndex);
+        if (this.sseIndex === 0) {
+          this.msgList.push({
+            // 标记为非人工智能机器人，即：为用户发送的消息
+            isAi: true,
+            // 消息内容
+            content: res.data,
+            // 消息创建时间
+            create_time: Date.now()
+          });
+        } else {
+          this.sliceMsgToLastMsg.addMsg(res.data);
+        }
+        this.showLastMsg();
+        this.sseIndex++;
+      });
+      common_vendor.index.onSocketClose(function(res) {
+        console.log("WebSocket 已关闭！");
+        console.log("WebSocket connection closed");
+        console.log("sse 结束", e);
+        this.sliceMsgToLastMsg.t = 0;
+        if (e && typeof e == "object" && e.errCode) {
+          let setLastAiMsgContent = (content) => {
+            if (this.sseIndex === 0) {
+              this.msgList.push({
+                isAi: true,
+                content,
+                create_time: Date.now()
+              });
+            } else {
+              this.updateLastMsg((lastMsg) => {
+                lastMsg.content += content;
+              });
+            }
+            this.showLastMsg();
+          };
+          if (e.errCode == 60004) {
+            let length = this.msgList.length;
+            if (length % 2) {
+              this.msgList.push({
+                isAi: true,
+                content: "内容涉及敏感",
+                illegal: true,
+                create_time: Date.now()
+              });
+              length += 1;
+            }
+            this.msgList[length - 2].illegal = true;
+            this.msgList[length - 1].illegal = true;
+            this.msgList[length - 1].content = "内容涉及敏感";
+          } else {
+            setLastAiMsgContent(e.errMsg);
+          }
+        }
+      });
+    },
     setLLMmodel() {
       this.$refs["llm-config"].open((model) => {
         console.log("model", model);
         this.llmModel = model;
       });
-    },
-    // 此(惰性)函数，检查是否开通uni-push;决定是否启用enableStream
-    async checkIsOpenPush() {
-      try {
-        await common_vendor.index.getPushClientId();
-        this.checkIsOpenPush = () => {
-        };
-      } catch (err) {
-        this.enableStream = false;
-      }
     },
     // 更新最后一条消息
     updateLastMsg(param) {
@@ -148,14 +216,14 @@ const _sfc_main = {
       this.msgList.splice(length - 1, 1, lastMsg);
     },
     // 广告关闭事件
-    onAdClose(e) {
-      console.log("onAdClose e.detail.isEnded", e.detail.isEnded);
-      if (e.detail.isEnded) {
+    onAdClose(e2) {
+      console.log("onAdClose e.detail.isEnded", e2.detail.isEnded);
+      if (e2.detail.isEnded) {
         let i = 0;
         common_vendor.index.showLoading({
           mask: true
         });
-        let myIntive = setInterval(async (e2) => {
+        let myIntive = setInterval(async (e3) => {
           i++;
           const db = common_vendor.Ys.database();
           let res = await db.collection("uni-id-users").where('"_id" == $cloudEnv_uid').field("score").get();
@@ -267,28 +335,7 @@ const _sfc_main = {
       this.send();
     },
     async send() {
-      var socketTask = common_vendor.index.connectSocket({
-        url: "ws://127.0.0.1:8888/websocket",
-        success: () => {
-          console.log("success");
-        },
-        fail: () => {
-          console.log("fail");
-        },
-        complete: () => {
-        }
-      });
-      socketTask.onOpen(() => {
-        console.log("WebSocket connection opened");
-      });
-      socketTask.onMessage((message) => {
-        console.log("Received message:", message.data);
-      });
-      socketTask.onClose(() => {
-        console.log("WebSocket connection closed");
-      });
       this.requestState = 0;
-      uniCoTaskList.clear();
       if (this.afterChatCompletion && this.afterChatCompletion.clear)
         this.afterChatCompletion.clear();
       let messages = [];
@@ -313,64 +360,10 @@ const _sfc_main = {
         };
       });
       console.log("send to ai messages:", messages);
-      await this.checkIsOpenPush();
       let sseEnd, requestEnd;
       if (this.enableStream) {
-        sseChannel = new common_vendor.Ys.SSEChannel();
         this.sliceMsgToLastMsg = new pages_chat_SliceMsgToLastMsg.SliceMsgToLastMsg(this);
-        sseChannel.on("message", (message) => {
-          if (this.sseIndex === 0) {
-            this.msgList.push({
-              isAi: true,
-              content: message,
-              create_time: Date.now()
-            });
-          } else {
-            this.sliceMsgToLastMsg.addMsg(message);
-          }
-          this.showLastMsg();
-          this.sseIndex++;
-        });
-        sseChannel.on("end", (e) => {
-          console.log("sse 结束", e);
-          this.sliceMsgToLastMsg.t = 0;
-          if (e && typeof e == "object" && e.errCode) {
-            let setLastAiMsgContent = (content) => {
-              if (this.sseIndex === 0) {
-                this.msgList.push({
-                  isAi: true,
-                  content,
-                  create_time: Date.now()
-                });
-              } else {
-                this.updateLastMsg((lastMsg) => {
-                  lastMsg.content += content;
-                });
-              }
-              this.showLastMsg();
-            };
-            if (e.errCode == 60004) {
-              let length = this.msgList.length;
-              if (length % 2) {
-                this.msgList.push({
-                  isAi: true,
-                  content: "内容涉及敏感",
-                  illegal: true,
-                  create_time: Date.now()
-                });
-                length += 1;
-              }
-              this.msgList[length - 2].illegal = true;
-              this.msgList[length - 1].illegal = true;
-              this.msgList[length - 1].content = "内容涉及敏感";
-            } else {
-              setLastAiMsgContent(e.errMsg);
-            }
-          }
-          sseEnd();
-        });
-        await sseChannel.open();
-        (function fnSelf(that) {
+        this.sendSocketMessage(messages)(function fnSelf(that) {
           fnSelf.clear = () => {
             if (fnSelf.clear.sse) {
               fnSelf.clear.sse();
@@ -388,7 +381,7 @@ const _sfc_main = {
               requestEnd = resolve;
               fnSelf.clear.request = reject;
             })
-          ]).then((e) => {
+          ]).then((e2) => {
             sseChannel.close();
             that.sseIndex = 0;
           }).catch((err) => {
@@ -396,7 +389,7 @@ const _sfc_main = {
           that.afterChatCompletion = fnSelf;
         })(this);
       }
-      let task = common_unicloudCoTask.main({
+      common_unicloudCoTask.main({
         coName: "uni-ai-chat",
         funName: "send",
         param: [{
@@ -430,18 +423,6 @@ const _sfc_main = {
               illegal: true
             });
           }
-          if (this.enableStream == false || this.sseIndex == 0 && (illegal || insufficientScore)) {
-            this.msgList.push({
-              // 消息创建时间
-              create_time: Date.now(),
-              // 标记消息为来自AI机器人
-              isAi: true,
-              // 消息内容
-              content: reply,
-              // 消息是否涉敏标记
-              illegal
-            });
-          }
           if (insufficientScore) {
             this.insufficientScore = true;
           }
@@ -461,7 +442,7 @@ const _sfc_main = {
             this.msgList.splice(index, 1, msg);
           }
         },
-        complete: (e) => {
+        complete: (e2) => {
           if (this.enableStream) {
             requestEnd();
           }
@@ -469,11 +450,11 @@ const _sfc_main = {
             this.showLastMsg();
           });
         },
-        fail: (e) => {
-          console.error(e);
+        fail: (e2) => {
+          console.error(e2);
           this.requestState = -100;
           common_vendor.index.showModal({
-            content: JSON.stringify(e.message),
+            content: JSON.stringify(e2.message),
             showCancel: false
           });
           if (this.enableStream) {
@@ -481,15 +462,8 @@ const _sfc_main = {
           }
         }
       });
-      uniCoTaskList.push(task);
     },
     closeSseChannel() {
-      if (sseChannel) {
-        sseChannel.close();
-        sseChannel = false;
-        this.sliceMsgToLastMsg.end();
-      }
-      uniCoTaskList.clear();
       this.sseIndex = 0;
     },
     // 滚动窗口以显示最新的一条消息
@@ -502,12 +476,12 @@ const _sfc_main = {
       });
     },
     // 清空消息列表
-    clearAllMsg(e) {
+    clearAllMsg(e2) {
       common_vendor.index.showModal({
         title: "确认要清空聊天记录？",
         content: "本操作不可撤销",
-        complete: (e2) => {
-          if (e2.confirm) {
+        complete: (e3) => {
+          if (e3.confirm) {
             this.closeSseChannel();
             this.msgList.splice(0, this.msgList.length);
           }

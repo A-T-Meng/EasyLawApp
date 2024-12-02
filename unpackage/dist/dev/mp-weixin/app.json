@@ -1,5 +1,9 @@
 {
   "pages": [
+    "pages/tabBar/component/component",
+    "pages/tabBar/API/API",
+    "pages/tabBar/template/template",
+    "pages/tabBar/extUI/extUI",
     "pages/chat/chat",
     "uni_modules/uni-id-pages/pages/userinfo/deactivate/deactivate",
     "uni_modules/uni-id-pages/pages/userinfo/userinfo",
@@ -23,6 +27,31 @@
     "navigationBarTitleText": "uni-app",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "position": "top",
+    "color": "#7A7E83",
+    "selectedColor": "#007AFF",
+    "borderStyle": "black",
+    "backgroundColor": "#F8F8F8",
+    "list": [
+      {
+        "pagePath": "pages/tabBar/component/component",
+        "text": "助手"
+      },
+      {
+        "pagePath": "pages/tabBar/API/API",
+        "text": "工具"
+      },
+      {
+        "pagePath": "pages/tabBar/extUI/extUI",
+        "text": "角色"
+      },
+      {
+        "pagePath": "pages/tabBar/template/template",
+        "text": "频道"
+      }
+    ]
   },
   "networkTimeout": {
     "request": 600000

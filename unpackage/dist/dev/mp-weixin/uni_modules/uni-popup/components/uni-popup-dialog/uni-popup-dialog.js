@@ -2,18 +2,24 @@
 const uni_modules_uniPopup_components_uniPopup_popup = require("../uni-popup/popup.js");
 const common_vendor = require("../../../../common/vendor.js");
 const uni_modules_uniPopup_components_uniPopup_i18n_index = require("../uni-popup/i18n/index.js");
-const { t } = common_vendor.initVueI18n(uni_modules_uniPopup_components_uniPopup_i18n_index.messages);
+const {
+  t
+} = common_vendor.initVueI18n(uni_modules_uniPopup_components_uniPopup_i18n_index.messages);
 const _sfc_main = {
   name: "uniPopupDialog",
   mixins: [uni_modules_uniPopup_components_uniPopup_popup.popup],
-  emits: ["confirm", "close"],
+  emits: ["confirm", "close", "update:modelValue", "input"],
   props: {
     inputType: {
       type: String,
       default: "text"
     },
-    value: {
-      type: [String, Number],
+    showClose: {
+      type: Boolean,
+      default: true
+    },
+    modelValue: {
+      type: [Number, String],
       default: ""
     },
     placeholder: {
@@ -47,12 +53,19 @@ const _sfc_main = {
     confirmText: {
       type: String,
       default: ""
+    },
+    maxlength: {
+      type: Number,
+      default: -1
+    },
+    focus: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
     return {
       dialogType: "error",
-      focus: false,
       val: ""
     };
   },
@@ -80,7 +93,14 @@ const _sfc_main = {
       }
     },
     value(val) {
-      this.val = val;
+      if (this.maxlength != -1 && this.mode === "input") {
+        this.val = val.slice(0, this.maxlength);
+      } else {
+        this.val = val;
+      }
+    },
+    val(val) {
+      this.$emit("update:modelValue", val);
     }
   },
   created() {
@@ -88,12 +108,10 @@ const _sfc_main = {
     if (this.mode === "input") {
       this.dialogType = "info";
       this.val = this.value;
+      this.val = this.modelValue;
     } else {
       this.dialogType = this.type;
     }
-  },
-  mounted() {
-    this.focus = true;
   },
   methods: {
     /**
@@ -131,16 +149,21 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   }, $props.mode === "base" ? {
     d: common_vendor.t($props.content)
   } : {
-    e: $props.inputType,
-    f: $options.placeholderText,
-    g: $data.focus,
-    h: $data.val,
-    i: common_vendor.o(($event) => $data.val = $event.detail.value)
+    e: $props.maxlength,
+    f: $props.inputType,
+    g: $options.placeholderText,
+    h: $props.focus,
+    i: $data.val,
+    j: common_vendor.o(($event) => $data.val = $event.detail.value)
   }, {
-    j: common_vendor.t($options.closeText),
-    k: common_vendor.o((...args) => $options.closeDialog && $options.closeDialog(...args)),
-    l: common_vendor.t($options.okText),
-    m: common_vendor.o((...args) => $options.onOk && $options.onOk(...args))
+    k: $props.showClose
+  }, $props.showClose ? {
+    l: common_vendor.t($options.closeText),
+    m: common_vendor.o((...args) => $options.closeDialog && $options.closeDialog(...args))
+  } : {}, {
+    n: common_vendor.t($options.okText),
+    o: common_vendor.n($props.showClose ? "uni-border-left" : ""),
+    p: common_vendor.o((...args) => $options.onOk && $options.onOk(...args))
   });
 }
 const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);
