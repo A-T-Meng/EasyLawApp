@@ -23,7 +23,7 @@
 				},
 				current: 0,
 				indexPage: [{
-					tabBar: '/pages/tabBar/component/component',
+					tabBar: '/pages/tabBar/assistant/assistant',
 					index: '/pages/index/index'
 				}, {
 					tabBar: '/pages/tabBar/API/API',
@@ -46,8 +46,8 @@
 						let path = newRoute.path
 						let comp
 						if (path === '/') {
-							comp = 'component'
-							path = '/pages/tabBar/component/component'
+							comp = 'assistant'
+							path = '/pages/tabBar/assistant/assistant'
 						} else {
 							comp = path.split('/')[2]
 						}

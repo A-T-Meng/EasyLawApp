@@ -4,7 +4,7 @@
 			<uni-dateformat class="create_time" :date="msg.create_time" format="MM/dd hh:mm:ss"></uni-dateformat>
 		</view>
 		<view :class="{reverse:!msg.isAi}">
-			<view class="userInfo">
+			<view class="userInfo">				
 				<image class="avatar" :src="msg.isAi?'../../static/uni-ai.png':'../../static/avatar.png'" mode="widthFix"></image>
 			</view>
 			<view class="content">
@@ -149,6 +149,7 @@
 		},
 		computed: {
 			msgContent() {
+				console.log(this.msg.isAi)
 				return this.msg.content
 			},
 			nodes() {

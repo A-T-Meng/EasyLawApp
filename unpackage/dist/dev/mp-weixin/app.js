@@ -3,11 +3,10 @@ Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
 const uni_modules_uniIdPages_init = require("./uni_modules/uni-id-pages/init.js");
 if (!Math) {
-  "./pages/tabBar/component/component.js";
-  "./pages/tabBar/API/API.js";
-  "./pages/tabBar/template/template.js";
-  "./pages/tabBar/extUI/extUI.js";
-  "./pages/chat/chat.js";
+  "./pages/tabBar/assistant/assistant.js";
+  "./pages/tabBar/tool/tool.js";
+  "./pages/tabBar/agent/agent.js";
+  "./pages/tabBar/user/user.js";
   "./uni_modules/uni-id-pages/pages/userinfo/deactivate/deactivate.js";
   "./uni_modules/uni-id-pages/pages/userinfo/userinfo.js";
   "./uni_modules/uni-id-pages/pages/userinfo/bind-mobile/bind-mobile.js";

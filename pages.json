@@ -1,19 +1,7 @@
 {
-	"leftWindow": {
-		"path": "windows/left-window.vue",
-		"style": {
-			"width": "350px"
-		}
-	},
-	"topWindow": {
-		"path": "windows/top-window.vue",
-		"style": {
-			"height": "60px"
-		}
-	},
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		{
-			"path": "pages/tabBar/component/component",
+			"path": "pages/tabBar/assistant/assistant",
 			"style": {
 				"navigationBarTitleText": "简法一键",
 				"app-plus": {
@@ -30,7 +18,7 @@
 			}
 		},
 		{
-			"path": "pages/tabBar/API/API",
+			"path": "pages/tabBar/tool/tool",
 			"style": {
 				"navigationBarTitleText": "简法一键",
 				"app-plus": {
@@ -46,7 +34,7 @@
 			}
 		},
 		{
-			"path": "pages/tabBar/template/template",
+			"path": "pages/tabBar/agent/agent",
 			"style": {
 				"navigationBarTitleText": "简法一键",
 				"app-plus": {
@@ -62,7 +50,7 @@
 			}
 		},
 		{
-			"path": "pages/tabBar/extUI/extUI",
+			"path": "pages/tabBar/user/user",
 			"style": {
 				"navigationBarTitleText": "简法一键",
 				"app-plus": {
@@ -78,15 +66,6 @@
 			}
 		},
 		{
-			"path": "pages/chat/chat",
-			"style": {
-				"navigationBarTitleText": "简法一键",
-				"enablePullDownRefresh": false
-				// #ifdef H5
-				,"navigationStyle": "custom"
-				//#endif
-			}
-		}, {
 			"path": "uni_modules/uni-id-pages/pages/userinfo/deactivate/deactivate",
 			"style": {
 				"navigationBarTitleText": "注销账号"
@@ -179,25 +158,30 @@
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},
-	"tabBar": {
-		"position": "top",
+	"tabBar": {		
 		"color": "#7A7E83",
 		"selectedColor": "#007AFF",
 		"borderStyle": "black",
 		"backgroundColor": "#F8F8F8",
-		"list": [{
-				"pagePath": "pages/tabBar/component/component",
+		// #ifdef MP-WEIXIN
+		"position": "top",
+		//#endif
+		"list": [
+			{
+				"pagePath": "pages/tabBar/assistant/assistant",
 				"text": "助手"
 			},
 			{
-				"pagePath": "pages/tabBar/API/API",
+				"pagePath": "pages/tabBar/tool/tool",
 				"text": "工具"
-			}, {
-				"pagePath": "pages/tabBar/extUI/extUI",
+			}, 
+			{
+				"pagePath": "pages/tabBar/agent/agent",
 				"text": "角色"
-			}, {
-				"pagePath": "pages/tabBar/template/template",
-				"text": "频道"
+			}, 
+			{
+				"pagePath": "pages/tabBar/user/user",
+				"text": "我的"
 			}
 		]
 	}

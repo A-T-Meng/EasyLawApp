@@ -7895,21 +7895,9 @@ const createSubpackageApp = initCreateSubpackageApp();
   wx.createPluginApp = global.createPluginApp = createPluginApp;
   wx.createSubpackageApp = global.createSubpackageApp = createSubpackageApp;
 }
-const leftWindow = {
-  path: "windows/left-window.vue",
-  style: {
-    width: "350px"
-  }
-};
-const topWindow = {
-  path: "windows/top-window.vue",
-  style: {
-    height: "60px"
-  }
-};
 const pages = [
   {
-    path: "pages/tabBar/component/component",
+    path: "pages/tabBar/assistant/assistant",
     style: {
       navigationBarTitleText: "简法一键",
       "app-plus": {
@@ -7928,7 +7916,7 @@ const pages = [
     }
   },
   {
-    path: "pages/tabBar/API/API",
+    path: "pages/tabBar/tool/tool",
     style: {
       navigationBarTitleText: "简法一键",
       "app-plus": {
@@ -7946,7 +7934,7 @@ const pages = [
     }
   },
   {
-    path: "pages/tabBar/template/template",
+    path: "pages/tabBar/agent/agent",
     style: {
       navigationBarTitleText: "简法一键",
       "app-plus": {
@@ -7964,7 +7952,7 @@ const pages = [
     }
   },
   {
-    path: "pages/tabBar/extUI/extUI",
+    path: "pages/tabBar/user/user",
     style: {
       navigationBarTitleText: "简法一键",
       "app-plus": {
@@ -7979,13 +7967,6 @@ const pages = [
           ]
         }
       }
-    }
-  },
-  {
-    path: "pages/chat/chat",
-    style: {
-      navigationBarTitleText: "简法一键",
-      enablePullDownRefresh: false
     }
   },
   {
@@ -8097,33 +8078,31 @@ const globalStyle = {
   backgroundColor: "#F8F8F8"
 };
 const tabBar = {
-  position: "top",
   color: "#7A7E83",
   selectedColor: "#007AFF",
   borderStyle: "black",
   backgroundColor: "#F8F8F8",
+  position: "top",
   list: [
     {
-      pagePath: "pages/tabBar/component/component",
+      pagePath: "pages/tabBar/assistant/assistant",
       text: "助手"
     },
     {
-      pagePath: "pages/tabBar/API/API",
+      pagePath: "pages/tabBar/tool/tool",
       text: "工具"
     },
     {
-      pagePath: "pages/tabBar/extUI/extUI",
+      pagePath: "pages/tabBar/agent/agent",
       text: "角色"
     },
     {
-      pagePath: "pages/tabBar/template/template",
-      text: "频道"
+      pagePath: "pages/tabBar/user/user",
+      text: "我的"
     }
   ]
 };
 const pagesJson = {
-  leftWindow,
-  topWindow,
   pages,
   globalStyle,
   tabBar
@@ -8417,7 +8396,7 @@ class v {
 function I(e2) {
   return e2 && "string" == typeof e2 ? JSON.parse(e2) : e2;
 }
-const S = true, b = "mp-weixin", A = I(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), C = b, P = I('{\n    "address": [\n        "127.0.0.1",\n        "192.168.1.113"\n    ],\n    "debugPort": 9001,\n    "initialLaunchType": "local",\n    "servePort": 7001,\n    "skipFiles": [\n        "<node_internals>/**",\n        "D:/HBuilderX/plugins/unicloud/**/*.js"\n    ]\n}\n'), T = I('[{"provider":"alipay","spaceName":"easy-law","spaceId":"env-00jxhfkug5va","spaceAppId":"2021004189627228","accessKey":"svUC3aBtoiTp1Kk0","secretKey":"oVafd0isvAF4IvLL"}]') || [];
+const S = true, b = "mp-weixin", A = I(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), C = b, P = I(""), T = I('[{"provider":"alipay","spaceName":"easy-law","spaceId":"env-00jxhfkug5va","spaceAppId":"2021004189627228","accessKey":"svUC3aBtoiTp1Kk0","secretKey":"oVafd0isvAF4IvLL"}]') || [];
 let O = "";
 try {
   O = "__UNI__EFAACB0";

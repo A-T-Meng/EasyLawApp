@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "简法一键",
+  "usingComponents": {
+    "chat": "../../../components/chat/chat"
+  }
+}
