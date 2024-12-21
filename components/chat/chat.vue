@@ -292,6 +292,7 @@
 		},
 		methods: {	
 			sendSocketMessage(messages) {
+				console.log('fksdajflksdjaklfjsdkljfklsdjfklsjfklds')
 				for (var i = 0; i < messages.length; i++) {
 					console.log(messages[i].content)
 					if (this.socketOpen) {
@@ -639,39 +640,7 @@
 					// 将多个字的文本，分割成单个字 分批插入到最末尾的消息中
 					this.sliceMsgToLastMsg = new SliceMsgToLastMsg(this)
 					this.sendSocketMessage(messages)
-					// 等待对话完成（云函数请求完成，sse 执行了 end）之后
-					(function fnSelf(that){
-						fnSelf.clear = ()=>{
-							// console.log('do fnSelf.clear');
-							if(fnSelf.clear.sse){
-								// console.log('fnSelf.clear.sse();')
-								fnSelf.clear.sse();
-							}
-							if(fnSelf.clear.request){
-								// console.log('fnSelf.clear.request();')
-								fnSelf.clear.request();
-							}
-						}
-						Promise.all([
-							new Promise((resolve,reject)=>{
-								sseEnd = resolve;
-								fnSelf.clear.sse = reject;
-							}),
-							new Promise((resolve,reject)=>{
-								requestEnd = resolve;
-								fnSelf.clear.request = reject;
-							})
-						]).then((e)=>{
-							// console.log('sseEnd && requestEnd');
-							//当两个都结束时
-							sseChannel.close()
-							// 结束流式响应 将流式响应计数值 设置为 0
-							that.sseIndex = 0
-						}).catch((err)=>{
-							// console.log('afterChatCompletion is close',err);
-						})
-						that.afterChatCompletion = fnSelf
-					})(this)
+					console.log('f')
 				}
 				
 				// 导入uni-ai-chat模块，并设置customUI为true
