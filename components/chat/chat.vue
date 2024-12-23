@@ -1,9 +1,9 @@
 <template>
 	<view class="container">
 		<!-- #ifdef H5 -->
-		<view v-if="isWidescreen" class="header">uni-ai-chat</view>
+		<view v-if="isWidescreen" class="header">简法一键</view>
 		<!-- #endif -->
-		<text class="noData" v-if="msgList.length === 0">暂时没有对话，有什么问题快来问我吧！</text>
+		<text class="noData" v-if="msgList.length === 0">你好，我是小简，有任何法律问题快来问我吧！</text>
 		<scroll-view :scroll-into-view="scrollIntoView" scroll-y="true" class="msg-list" :enable-flex="true">
 			<uni-ai-msg ref="msg" v-for="(msg,index) in msgList" :key="index" :msg="msg" @changeAnswer="changeAnswer"
 				:show-cursor="index == msgList.length - 1 && msgList.length%2 === 0 && sseIndex"
@@ -14,11 +14,7 @@
 					<uni-icons @click="send" color="#d22" type="refresh-filled" class="retries-icon"></uni-icons>
 				</view>
 				<view class="tip-ai-ing" v-else-if="msgList.length">
-					<text>uni-ai正在思考中...</text>
-					<view v-if="NODE_ENV == 'development' && !enableStream">
-						如需提速，请开通<uni-link class="uni-link" href="https://uniapp.dcloud.net.cn/uniCloud/uni-ai-chat.html"
-							text="[流式响应]"></uni-link>
-					</view>
+					<text>小简正在思考中...</text>
 				</view>
 			</template>
 			<view v-if="adpid" class="open-ad-btn-box">
@@ -51,7 +47,7 @@
 				</view>
 				<view class="textarea-box">
 					<textarea v-model="content" :cursor-spacing="15" class="textarea" :auto-height="!isWidescreen"
-						placeholder="请输入要发给uni-ai的内容" :maxlength="-1" :adjust-position="false"
+						placeholder="请输入" :maxlength="-1" :adjust-position="false"
 						:disable-default-padding="false" placeholder-class="input-placeholder"></textarea>
 				</view>
 				<view class="send-btn-box" :title="(msgList.length && msgList.length%2 !== 0) ? 'ai正在回复中不能发送':''">

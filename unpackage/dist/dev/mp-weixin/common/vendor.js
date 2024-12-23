@@ -8396,7 +8396,7 @@ class v {
 function I(e2) {
   return e2 && "string" == typeof e2 ? JSON.parse(e2) : e2;
 }
-const S = true, b = "mp-weixin", A = I(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), C = b, P = I(""), T = I('[{"provider":"alipay","spaceName":"easy-law","spaceId":"env-00jxhfkug5va","spaceAppId":"2021004189627228","accessKey":"svUC3aBtoiTp1Kk0","secretKey":"oVafd0isvAF4IvLL"}]') || [];
+const S = true, b = "mp-weixin", A = I(define_process_env_UNI_SECURE_NETWORK_CONFIG_default), C = b, P = I(""), T = I("[]") || [];
 let O = "";
 try {
   O = "__UNI__EFAACB0";
