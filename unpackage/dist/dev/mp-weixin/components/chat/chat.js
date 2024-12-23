@@ -107,6 +107,7 @@ const _sfc_main = {
   },
   methods: {
     sendSocketMessage(messages) {
+      console.log("fksdajflksdjaklfjsdkljfklsdjfklsjfklds");
       for (var i = 0; i < messages.length; i++) {
         console.log(messages[i].content);
         if (this.socketOpen) {
@@ -362,31 +363,8 @@ const _sfc_main = {
       let sseEnd, requestEnd;
       if (this.enableStream) {
         this.sliceMsgToLastMsg = new components_chat_SliceMsgToLastMsg.SliceMsgToLastMsg(this);
-        this.sendSocketMessage(messages)(function fnSelf(that) {
-          fnSelf.clear = () => {
-            if (fnSelf.clear.sse) {
-              fnSelf.clear.sse();
-            }
-            if (fnSelf.clear.request) {
-              fnSelf.clear.request();
-            }
-          };
-          Promise.all([
-            new Promise((resolve, reject) => {
-              sseEnd = resolve;
-              fnSelf.clear.sse = reject;
-            }),
-            new Promise((resolve, reject) => {
-              requestEnd = resolve;
-              fnSelf.clear.request = reject;
-            })
-          ]).then((e2) => {
-            sseChannel.close();
-            that.sseIndex = 0;
-          }).catch((err) => {
-          });
-          that.afterChatCompletion = fnSelf;
-        })(this);
+        this.sendSocketMessage(messages);
+        console.log("f");
       }
       common_unicloudCoTask.main({
         coName: "uni-ai-chat",
