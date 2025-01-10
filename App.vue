@@ -1,22 +1,8 @@
 <script>
-	import uniIdPagesInit from '@/uni_modules/uni-id-pages/init.js';
-	import config from '@/config.js';
 	export default {
-		 onLaunch:async function() {
-			// 初始化uni身份信息管理模块
-			uniIdPagesInit();
+		onLaunch: function() {
+			console.warn('当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
 			console.log('App Launch')
-			if(typeof(uniCloud.SSEChannel) == 'undefined' ){
-				uni.showModal({
-					content: '本项目，仅支持HBuilderX 正式版 v3.7.10 或 alpha v3.8.0及以上版本请升级',
-					showCancel: false
-				});
-			}
-			// #ifdef MP-WEIXIN
-			if(config.adpid){
-				uniCloud.initSecureNetworkByWeixin()
-			}
-			// #endif
 		},
 		onShow: function() {
 			console.log('App Show')
@@ -29,14 +15,18 @@
 
 <style lang="scss">
 	/*每个页面公共css */
-	/* #ifdef H5 */
-	@media screen and (min-width:650px){
-		/* pc宽屏 隐藏会话页面头部 && 全局底部导航 以下兼容了Vue2和3两种模式的样式*/
-			uni-page[data-page="pages/chat/chat"] uni-page-head,
-			{
-				display: none !important;
-				background-color: red !important;
-			}
+	@import '@/uni_modules/uni-scss/index.scss';
+	/* #ifndef APP-NVUE */
+	@import '@/static/customicons.css';
+	// 设置整个项目的背景色
+	page {
+		background-color: #f5f5f5;
 	}
+
 	/* #endif */
+	.example-info {
+		font-size: 14px;
+		color: #333;
+		padding: 10px;
+	}
 </style>

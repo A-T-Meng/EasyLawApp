@@ -1,7 +1,13 @@
 "use strict";
-const _imports_0$1 = "/assets/face-verify-icon.da277dd7.svg";
-const _imports_0 = "/assets/photo.6f69f4e3.svg";
-const _imports_1 = "/assets/rotate.9f2e0410.svg";
-exports._imports_0 = _imports_0$1;
-exports._imports_0$1 = _imports_0;
+const _imports_0 = "/static/fangwuzulin.png";
+const _imports_1 = "/static/laodong.png";
+const _imports_2 = "/static/minjianjiedai.png";
+const _imports_3 = "/static/lihun.png";
+const _imports_4 = "/static/maimai.png";
+const _imports_5 = "/static/jinrongjiedai.png";
+exports._imports_0 = _imports_0;
 exports._imports_1 = _imports_1;
+exports._imports_2 = _imports_2;
+exports._imports_3 = _imports_3;
+exports._imports_4 = _imports_4;
+exports._imports_5 = _imports_5;

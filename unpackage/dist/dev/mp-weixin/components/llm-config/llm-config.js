@@ -79,7 +79,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     b: common_vendor.o((...args) => $options.radioChange && $options.radioChange(...args)),
     c: common_vendor.o((...args) => $options.cancel && $options.cancel(...args)),
     d: common_vendor.o((...args) => $options.confirm && $options.confirm(...args)),
-    e: common_vendor.sr("popup", "b03934f8-0"),
+    e: common_vendor.sr("popup", "7081ab76-0"),
     f: common_vendor.p({
       type: "top"
     })

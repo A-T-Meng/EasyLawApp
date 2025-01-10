@@ -1,9 +1,9 @@
 <template>
 	<view class="container">
 		<!-- #ifdef H5 -->
-		<view v-if="isWidescreen" class="header">简法一键</view>
+		<view v-if="isWidescreen" class="header">uni-ai-chat</view>
 		<!-- #endif -->
-		<text class="noData" v-if="msgList.length === 0">你好，我是小简，有任何法律问题快来问我吧！</text>
+		<text class="noData" v-if="msgList.length === 0">暂时没有对话，有什么问题快来问我吧！</text>
 		<scroll-view :scroll-into-view="scrollIntoView" scroll-y="true" class="msg-list" :enable-flex="true">
 			<uni-ai-msg ref="msg" v-for="(msg,index) in msgList" :key="index" :msg="msg" @changeAnswer="changeAnswer"
 				:show-cursor="index == msgList.length - 1 && msgList.length%2 === 0 && sseIndex"
@@ -14,21 +14,15 @@
 					<uni-icons @click="send" color="#d22" type="refresh-filled" class="retries-icon"></uni-icons>
 				</view>
 				<view class="tip-ai-ing" v-else-if="msgList.length">
-					<text>小简正在思考中...</text>
+					<text>uni-ai正在思考中...</text>
 				</view>
 			</template>
-			<view v-if="adpid" class="open-ad-btn-box">
-				<text style="color: red;">
-					默认不启用广告组件(被注释)，如需使用，请"去掉注释"(“重新运行”后生效)
-					位置：/pages/chat/chat.vue 第30行，或全局搜索 uni-ad-rewarded-video
-				</text>
-				<!-- <uni-ad-rewarded-video v-show="insufficientScore" :adpid="adpid" @onAdClose="onAdClose"></uni-ad-rewarded-video> -->
-			</view>
 			<view @click="closeSseChannel" class="stop-responding" v-if="sseIndex"> ▣ 停止响应</view>
 			<view id="last-msg-item" style="height: 1px;"></view>
 		</scroll-view>
+		
 
-		<view class="foot-box" :style="{'padding-bottom':footBoxPaddingBottom}">
+		<view class="foot-box">
 			<!-- #ifdef H5 -->
 			<view class="pc-menu" v-if="isWidescreen">
 				<view class="pc-trash pc-menu-item" @click="clearAllMsg" title="删除">
@@ -39,15 +33,16 @@
 				</view>
 			</view>
 			<!-- #endif -->
+			<view v-if="!isWidescreen">
+				<button class="menu-item mini-btn" type="default" size="mini" @click="clearAllMsg" color="#888"><uni-icons type="trash" color="#888">按钮</uni-icons></button>
+				<button class="menu-item mini-btn" type="default" size="mini" @click="clearAllMsg" color="#888"><uni-icons type="trash" color="#888">按钮</uni-icons></button>
+				<button class="menu-item mini-btn" type="default" size="mini" @click="clearAllMsg" color="#888"><uni-icons type="trash" color="#888">按钮</uni-icons></button>
+				<button class="menu-item mini-btn" type="default" size="mini" @click="clearAllMsg" color="#888"><uni-icons type="trash" color="#888">按钮</uni-icons></button>
+			</view>
 			<view class="foot-box-content">
-				<view v-if="!isWidescreen" class="menu">
-					<uni-icons class="menu-item" @click="clearAllMsg" type="trash" size="24" color="#888"></uni-icons>
-					<uni-icons class="menu-item" @click="setLLMmodel" color="#555" size="20px"
-						type="settings"></uni-icons>
-				</view>
 				<view class="textarea-box">
-					<textarea v-model="content" :cursor-spacing="15" class="textarea" :auto-height="!isWidescreen"
-						placeholder="请输入" :maxlength="-1" :adjust-position="false"
+					<textarea v-model="content" :cursor-spacing="18" class="textarea" :auto-height="!isWidescreen"
+						placeholder="请输入要发给uni-ai的内容" :maxlength="-1" :adjust-position="false"
 						:disable-default-padding="false" placeholder-class="input-placeholder"></textarea>
 				</view>
 				<view class="send-btn-box" :title="(msgList.length && msgList.length%2 !== 0) ? 'ai正在回复中不能发送':''">
@@ -67,15 +62,9 @@
 	// 引入配置文件
 	import config from '@/config.js';
 
-	// 导入uniCloud云对象task模块
-	import uniCoTask from '@/common/unicloud-co-task.js';
 	// 导入 将多个字消息文本，分割成单个字 分批插入到最末尾的消息中 的类
 	import SliceMsgToLastMsg from './SliceMsgToLastMsg.js';
 
-	// 获取广告id
-	const {
-		adpid
-	} = config
 	// 初始化sse通道
 	let sseChannel = false;
 
@@ -101,8 +90,6 @@
 				enableStream: true,
 				// 当前屏幕是否为宽屏
 				isWidescreen: false,
-				// 广告位id
-				adpid,
 				llmModel: false,
 				keyboardHeight: 0,
 				socketOpen: false,
@@ -175,26 +162,6 @@
 			// #endif
 		},
 		async mounted() {
-			// 如果存在广告位id且用户token未过期
-			if (this.adpid && uniCloud.getCurrentUserInfo().tokenExpired > Date.now()) {
-				// 查询当前用户的积分
-				// 获取数据库对象
-				let db = uniCloud.databaseForJQL();
-				// 获取uni-id-users集合
-				let res = await db.collection("uni-id-users")
-					// 查询条件
-					.where({
-						// 当前用户id
-						"_id": uniCloud.getCurrentUserInfo().uid
-					})
-					// 返回score字段
-					.field('score')
-					// 执行查询
-					.get()
-				// 输出当前用户积分
-				console.log('当前用户有多少积分:', res.data[0] && res.data[0].score);
-			}
-
 			// 页面启动的生命周期，这里编写页面加载时的逻辑
 			this.initSocket();
 
@@ -287,17 +254,14 @@
 			// #endif
 		},
 		methods: {	
-			sendSocketMessage(messages) {
-				console.log('fksdajflksdjaklfjsdkljfklsdjfklsjfklds')
-				for (var i = 0; i < messages.length; i++) {
-					console.log(messages[i].content)
-					if (this.socketOpen) {
-						uni.sendSocketMessage({
-							data: messages[i].content
-						});
-					} else {
-						this.socketMsgQueue.push(messages[i]);
-					}
+			sendSocketMessage(message) {
+				console.log(message.content)
+				if (this.socketOpen) {
+					uni.sendSocketMessage({
+						data: message.content
+					});
+				} else {
+					this.socketMsgQueue.push(message);
 				}
 			},
 			
@@ -319,30 +283,32 @@
 				  console.log('收到服务器内容：' + res.data, this.sseIndex);
 				  // 将从云端接收到的消息添加到消息列表中
 				  // 如果之前未添加过就添加，否则就执行更新最后一条消息
-				  if (this.sseIndex === 0) {
-					this.msgList.push({
-						// 标记为非人工智能机器人，即：为用户发送的消息
-						isAi: true,
-						// 消息内容
-						content: res.data,
-						// 消息创建时间
-						create_time: Date.now()
-					});
+				  if (res.data === 'endendend'){
+					  this.closeSseChannel()
 				  } else {
-				  	this.sliceMsgToLastMsg.addMsg(res.data)
-				  	// this.updateLastMsg(lastMsg => {
-				  	// 	lastMsg.content += message
-				  	// })
-				  }
-				  this.showLastMsg()
-				  // 让流式响应计数值递增
-				  this.sseIndex++
+						if (this.sseIndex === 0) {
+							this.msgList.push({
+								// 标记为非人工智能机器人，即：为用户发送的消息
+								isAi: true,
+								// 消息内容
+								content: res.data,
+								// 消息创建时间
+								create_time: Date.now()
+							});
+						} else {
+							this.sliceMsgToLastMsg.addMsg(res.data)
+							// this.updateLastMsg(lastMsg => {
+							// 	lastMsg.content += message
+							// })
+						}
+						this.showLastMsg()
+						// 让流式响应计数值递增
+						this.sseIndex++
+					}
 				});
 				
 				uni.onSocketClose(function (res) {
-				  console.log('WebSocket 已关闭！');
 				  console.log('WebSocket connection closed');
-				  console.log('sse 结束',e)
 				  // 更改“按字分割追加到最后一条消息“的时间间隔为0，即：一次性加载完（不再分割加载）
 				  this.sliceMsgToLastMsg.t = 0
 				  if(e && typeof e == 'object' && e.errCode){
@@ -418,55 +384,6 @@
 				}
 				this.msgList.splice(length - 1, 1, lastMsg)
 			},
-			// 广告关闭事件
-			onAdClose(e) {
-				console.log(222222222222222222222222222222222222222222)
-				console.log('onAdClose e.detail.isEnded', e.detail.isEnded);
-				if (e.detail.isEnded) {
-					//5次轮训查结果
-					let i = 0;
-					uni.showLoading({
-						mask: true
-					})
-					let myIntive = setInterval(async e => {
-						i++;
-						// 获取云数据库实例
-						const db = uniCloud.database();
-						// 获取uni-id-users集合
-						let res = await db.collection("uni-id-users")
-							// 查询条件为_id等于当前用户id
-							.where('"_id" == $cloudEnv_uid')
-							// 只返回score字段
-							.field('score')
-							// 执行查询
-							.get()
-						// 解构出score字段的值，如果没有则默认为undefined
-						let {
-							score
-						} = res.result.data[0] || {}
-						console.log('score',score);
-						if (score > 0 || i > 5) {
-							// 清除轮询定时器
-							clearInterval(myIntive)
-							// 隐藏加载提示
-							uni.hideLoading()
-							if (score > 0) {
-								this.insufficientScore = false
-								// 移除最后一条消息
-								this.msgList.pop()
-								this.$nextTick(() => {
-									// 重发消息
-									this.send()
-									uni.showToast({
-										title: '积分余额:' + score,
-										icon: 'none'
-									});
-								})
-							}
-						}
-					}, 2000);
-				}
-			},
 			// 换一个答案
 			async changeAnswer() {
 				// 如果问题还在回答中需要先关闭
@@ -481,7 +398,6 @@
 				})
 				// 多设备登录时其他设备看广告后点击重新回答，insufficientScore应当设置为 false
 				this.insufficientScore = false
-				console.log(3333333333333333333333333)
 				this.send()
 			},
 			removeMsg(index) {
@@ -503,54 +419,6 @@
 						title: 'ai正在回复中不能发送',
 						icon: 'none'
 					});
-				}
-				// 如果开启了广告位需要登录
-				if (this.adpid) {
-					// 获取本地缓存的token
-					let token = uni.getStorageSync('uni_id_token')
-					// 如果token不存在
-					if (!token) {
-						// 弹出提示框
-						return uni.showModal({
-							// 提示内容
-							content: '启用激励视频，客户端需登录并启用安全网络',
-							// 不显示取消按钮
-							showCancel: false,
-							// 确认按钮文本
-							confirmText: "查看详情",
-							// 弹框关闭后执行的回调函数
-							complete() {
-								// 文档链接
-								let url = "https://uniapp.dcloud.net.cn/uniCloud/uni-ai-chat.html#ad"
-								// #ifndef H5
-								// 将文档链接复制到剪贴板
-								uni.setClipboardData({
-									// 复制的内容
-									data: url,
-									// 不显示提示框
-									showToast: false,
-									// 复制成功后的回调函数
-									success() {
-										// 弹出提示框
-										uni.showToast({
-											// 提示内容
-											title: '已复制文档链接，请到浏览器粘贴浏览',
-											// 不显示图标
-											icon: 'none',
-											// 提示框持续时间
-											duration: 5000
-										});
-									}
-								})
-								// #endif
-
-								// #ifdef H5
-								// 在新窗口打开文档链接
-								window.open(url)
-								// #endif
-							}
-						});
-					}
 				}
 
 				// 如果内容为空
@@ -587,152 +455,16 @@
 				this.requestState = 0
 				// 清除旧的afterChatCompletion（如果存在）
 				if(this.afterChatCompletion && this.afterChatCompletion.clear) this.afterChatCompletion.clear()
-				
-				let messages = []
-				// 复制一份，消息列表数据
-				let msgs = JSON.parse(JSON.stringify(this.msgList))
-				
-				// - 获取上下文的代码【start】-
-				// 带总结的消息 index
-				let findIndex = [...msgs].reverse().findIndex(item => item.summarize)
-				// console.log('findIndex', findIndex)
-				if (findIndex != -1) {
-					let aiSummaryIndex = msgs.length - findIndex - 1
-					// console.log('aiSummaryIndex', aiSummaryIndex)
-					// 将带总结的消息的 内容 更换成 总结
-					msgs[aiSummaryIndex].content = msgs[aiSummaryIndex].summarize
-					// 拿最后一条带直接的消息作为与ai对话的msg body
-					msgs = msgs.splice(aiSummaryIndex)
-				} else {
-					// 如果未总结过就直接从末尾拿10条
-					msgs = msgs.splice(-10)
-				}
-				// 过滤涉敏问题
-				msgs = msgs.filter(msg => !msg.illegal)
-				// - 获取上下文的代码【end】-
-				
-				// 如果：不希望带上上下文；请注释掉 上方：获取上下文的代码【start】-【end】。并添加，代码： msgs = [msgs.pop()]
-				// 根据数据内容设置角色
-				messages = msgs.map(item => {
-					// 角色默认为用户
-					let role = "user"
-					// 如果是ai再根据 是否有总结 来设置角色为 system 还是 assistant
-					if (item.isAi) {
-						role = item.summarize ? 'system' : 'assistant'
-					}
-					return {
-						content: item.content,
-						role
-					}
-				})
 
 				// 在控制台输出 向ai机器人发送的完整消息内容
-				console.log('send to ai messages:', messages);
-
-				// 流式响应和云对象的请求结束回调函数
-				let sseEnd,requestEnd;
+				let message = this.msgList[this.msgList.length - 1]
+				console.log('send to ai message:', message);
 				// 判断是否开启了流式响应模式
 				if (this.enableStream) {
 					// 将多个字的文本，分割成单个字 分批插入到最末尾的消息中
 					this.sliceMsgToLastMsg = new SliceMsgToLastMsg(this)
-					this.sendSocketMessage(messages)
-					console.log('f')
+					this.sendSocketMessage(message)
 				}
-				
-				// 导入uni-ai-chat模块，并设置customUI为true
-				let task = uniCoTask({
-					coName: "uni-ai-chat",
-					funName: "send",
-					param: [{
-						messages, // 消息列表
-						sseChannel, // 消息通道
-						llmModel: this.llmModel
-					}],
-					config: {
-						customUI: true
-					},
-					success: res => {
-						// 更新 通讯状态为100（发送成功）
-						this.requestState = 100
-						// console.log("success",res);
-						if (!res.data) return
-						
-						let {
-							reply,
-							summarize,
-							insufficientScore,
-							illegal
-						} = res.data
-						
-						// 特殊处理 - start
-						if(this.enableStream == false && !reply){
-							//服务商检测到AI输出了敏感内容
-							illegal = true
-							reply = "内容涉及敏感"
-						}
-						// 特殊处理 - end
-            
-            // 非流式模式 && 内容涉及敏感
-            if (this.enableStream == false && illegal) {
-            	console.error('内容涉及敏感');
-            	this.updateLastMsg({
-            		// 添加消息涉敏标记
-            		illegal: true
-            	})
-            }
-
-						if(insufficientScore){
-							// 积分不足
-							this.insufficientScore = true
-						}
-						// 如果回调包含总结的内容，就设置总结
-						if(summarize){
-							console.log(' 拿到总结',summarize);
-							// 总结的内容是上一轮对话的
-							// console.log('setSummarize');
-							let index = this.msgList.length - 1;
-							// 如果最后一项是ai就往前退2项，否则退1项（流式响应的时候，回答可能晚于总结）
-							if(index%2){
-								index -= 2
-							}else{
-								index -= 1
-							}
-							// 假如第一次提问就需要总结
-							if (index < 1) {
-								index = 1
-							}
-							let msg = this.msgList[index]
-							msg.summarize = summarize
-							this.msgList.splice(index, 1, msg)
-							// console.log('setSummarize this.msgList',this.msgList,this.msgList.length-1,index);
-						}
-						
-					},
-					complete:e=>{
-						if (this.enableStream) {
-							requestEnd()
-						}
-						// console.log('complete:',e);
-						// 滚动窗口以显示最新的一条消息
-						this.$nextTick(() => {
-							this.showLastMsg()
-						})
-					},
-					fail: e => {
-						console.error(e);
-						// 更新 通讯状态为-100（发送失败）
-						this.requestState = -100
-						// 弹框提示用户错误原因
-						uni.showModal({
-							content: JSON.stringify(e.message),
-							showCancel: false
-						});
-						// 如果启用流式，云函数出错了，sse 也应当被终止
-						if (this.enableStream) {
-							sseEnd()
-						}
-					}
-				})
 			},
 			closeSseChannel() {
 				// 如果存在消息通道，就关闭消息通道
@@ -842,11 +574,12 @@
 	}
 
 	.foot-box-content {
+		padding: 10px 0 0 0;
 		justify-content: space-around;
 	}
 
 	.textarea-box {
-		padding: 8px 10px;
+		padding: 8px 36px;
 		background-color: #f9f9f9;
 		border-radius: 5px;
 	}
@@ -889,13 +622,12 @@
 	}
 
 	.menu {
-		justify-content: center;
+		justify-content: left;
 		align-items: center;
 		flex-shrink: 0;
 	}
 
 	.menu-item {
-		width: 30rpx;
 		margin: 0 10rpx;
 	}
 

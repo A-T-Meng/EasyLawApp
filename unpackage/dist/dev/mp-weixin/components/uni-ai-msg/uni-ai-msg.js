@@ -76,7 +76,6 @@ const _sfc_main = {
   },
   computed: {
     msgContent() {
-      console.log(this.msg.isAi);
       return this.msg.content;
     },
     nodes() {

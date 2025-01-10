@@ -1,0 +1,42 @@
+/* 水平间距 */
+/* 水平间距 */
+.image {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  /* 设置你需要的圆角值 */
+}
+.mb-10 {
+  margin-bottom: 10px;
+}
+.text {
+  font-size: 14px;
+  margin-top: 5px;
+}
+.grid-dynamic-box {
+  margin-bottom: 15px;
+}
+.grid-item-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0;
+}
+.grid-item-box-row {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0;
+}
+.grid-dot {
+  position: absolute;
+  top: 5px;
+  right: 15px;
+}
+.swiper {
+  height: 420px;
+}
